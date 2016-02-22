@@ -75,6 +75,9 @@ def parse_arguments_list(line, filename, index):
             elif sym == ',':
                 args.append(arg)
                 state = WAIT_ARG
+            elif i == len(line):
+                args.append(arg+sym)
+                state = WAIT_COMMA_OR_EOL
             else:
                 arg += sym
         elif state == WAIT_COMMA_OR_EOL:
@@ -175,7 +178,6 @@ def parse_collector_config(filename):
             if 'log' in config:
                 raise ConfigurationParseError('Duplicate log directive', filename, index)
             config['log'] = LogPattern.match(line).group(1)
-            print LogPattern.match(line).groups()
         elif PeriodPattern.match(line):
             if 'period' in config:
                 raise ConfigurationParseError('Duplicate period directive, index', filename, index)
@@ -221,6 +223,8 @@ class TestConfigReader(unittest.TestCase):
     def test_argument_parser(self):
         args = parse_arguments_list('"abc",\'def\' ,19, "some spaced arg\'" ', "filename", 0)
         self.assertEqual(['abc', 'def', '19', 'some spaced arg\''], args)
+        args = parse_arguments_list('status', 'filename', 0)
+        self.assertEqual(['status'], args)
 
 if __name__ == '__main__':
     unittest.main()
