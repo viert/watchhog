@@ -1,26 +1,40 @@
 import os
 import sys
-from setuptools import setup, find_packages
-from distutils.core import Extension
+from setuptools import setup, find_packages, Extension
 
-parser_source = os.path.join(os.path.dirname(__file__), 'hog/parser/parser_native.cpp')
+VERSION_FILENAME = os.path.join(os.path.dirname(__file__), '.version')
+BUILD_VERSION_FILENAME = os.path.join(os.path.dirname(__file__), '.build')
 
-if sys.platform == 'darwin':
-    include_dirs = [
-        # '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/usr/include/',
-        # '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/Python.framework/Headers',
-        '/usr/local/Cellar/boost/1.56.0/include'
-    ]
-elif sys.platform.startswith('linux'):
+def get_version():
+    with open(VERSION_FILENAME) as vf:
+        version = vf.read().strip()
+    try:
+        bvf = open(BUILD_VERSION_FILENAME)
+        build = bvf.read().strip()
+        build = int(build)
+    except OSError:
+        build = 0
+    build += 1
+    with open(BUILD_VERSION_FILENAME, "w") as bvf:
+        bvf.write(str(build))
+    return "%s.%d" % (version, build)
+
+parser_source = os.path.join(os.path.dirname(__file__), 'native_ext/parser_native.cpp')
+config = {
+        'name': 'watchhog',
+        'version': get_version(),
+        'description': 'WatchHog is a fast log watcher and parser',
+        'packages': find_packages(),
+        'scripts': ['watchhog.py']
+}
+
+if sys.platform.startswith('linux'):
     include_dirs = [
             '/usr/local/include'
     ]
-
-parser_native = Extension('hog/parser/parser_native',
+    parser_native = Extension('hog/parser/parser_native',
                           sources=[parser_source],
                           include_dirs=include_dirs)
-setup ( name = 'watchhog',
-        version = '1.0',
-        description = 'WatchHog is a fast log watcher and parser',
-        packages = find_packages(),
-        ext_modules = [parser_native])
+    config['ext_modules'] = [parser_native]
+
+setup ( **config )
