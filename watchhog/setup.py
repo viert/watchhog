@@ -2,8 +2,9 @@ import os
 import sys
 from setuptools import setup, find_packages, Extension
 
-VERSION_FILENAME = os.path.join(os.path.dirname(__file__), '.version')
-BUILD_VERSION_FILENAME = os.path.join(os.path.dirname(__file__), '.build')
+cdir = os.path.dirname(__file__)
+VERSION_FILENAME = os.path.join(cdir, '.version')
+BUILD_VERSION_FILENAME = os.path.join(cdir, '.build')
 
 def get_version():
     with open(VERSION_FILENAME) as vf:
@@ -19,22 +20,28 @@ def get_version():
         bvf.write(str(build))
     return "%s.%d" % (version, build)
 
-parser_source = os.path.join(os.path.dirname(__file__), 'native_ext/parser_native.cpp')
 config = {
         'name': 'watchhog',
         'version': get_version(),
         'description': 'WatchHog is a fast log watcher and parser',
         'packages': find_packages(),
-        'scripts': ['watchhog.py']
+        'scripts': [os.path.join(cdir, 'watchhog.py')],
+        'author': 'Pavel Vorobyov',
+        'author_email': 'aquavitale@yandex.ru',
+        'license': 'MIT',
+        'keywords': 'log parse index sysadmin'
 }
 
 if sys.platform.startswith('linux'):
     include_dirs = [
             '/usr/local/include'
     ]
+    parser_source = os.path.join(os.path.dirname(__file__), 'native_ext/parser_native.cpp')
     parser_native = Extension('hog/parser/parser_native',
                           sources=[parser_source],
                           include_dirs=include_dirs)
     config['ext_modules'] = [parser_native]
+else:
+    print "WARNING! Native extensions are available on linux machines only yet"
 
 setup ( **config )
