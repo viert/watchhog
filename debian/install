@@ -1,1 +1,4 @@
-watchhog/build/lib*/*       usr/share/pyshared
+watchhog/build/lib*/*                           usr/share/pyshared
+watchhog/build/scripts*/*                       usr/local/bin
+watchhog/conf/watchhog.conf                     etc/watchhog
+watchhog/conf/collectors/nginx.conf.example     etc/watchhog/collectors
