@@ -2,3 +2,4 @@
 *.substvars
 *.debhelper
 watchhog
+files
