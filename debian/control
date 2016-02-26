@@ -1,0 +1,12 @@
+Source: watchhog
+Section: admin
+Priority: extra
+Maintainer: Pavel Vorobyov <aquavitale@yandex.ru>
+Build-Depends: debhelper (>= 8.0.0), libboost-python1.56-dev
+Standards-Version: 3.9.2
+Homepage: http://viert.fm
+
+Package: watchhog
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-python1.56.0, python-httplib2
+Description: Fast log parser and indexer
