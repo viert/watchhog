@@ -2,3 +2,4 @@ watchhog/build/lib*/*                           usr/share/pyshared
 watchhog/build/scripts*/*                       usr/sbin
 watchhog/conf/watchhog.conf                     etc/watchhog
 watchhog/conf/collectors/nginx.conf.example     etc/watchhog/collectors
+watchhog/plugins/*.py                           usr/share/pyshared/hog/plugins
