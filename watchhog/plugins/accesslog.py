@@ -1,24 +1,28 @@
 import logging
 
+def rps_by(store, field=None, datetime_field_name='datetime'):
+    if field is None:
+        logging.error("count_by_field(field) field can't be None")
 
-def rps_by_vhost(store, vhost_field='vhost', date_field_name='datetime'):
-    dtkeys = store.get_field_keys(date_field_name)
+    dtkeys = store.get_field_keys(datetime_field_name)
+
     if dtkeys is None:
-        logging.error('rps_by_host() needs "%s" field indexed to work properly' % date_field_name)
+        logging.error('count_by_field() needs "%s" field indexed to work properly' % datetime_field_name)
         return {}
-    vhost_counters = store.get_field_counter(vhost_field)
-    if vhost_counters is None:
-        logging.error('rps_by_host() needs "%s" field indexed to work properly' % vhost_field)
+
+    counters = store.get_field_counter(field)
+    if counters is None:
+        logging.error('count_by_field() needs "%s" field indexed to work properly' % field)
         return {}
 
     timedelta = dtkeys[-1] - dtkeys[0]
     rps = {}
 
-    for host,value in vhost_counters.items():
-        rps[host] = float(value) / timedelta
+    for fieldvalue, count in counters.items():
+        rps[fieldvalue] = float(count) / timedelta.total_seconds()
 
     rps['__total__'] = sum(rps.values())
     return rps
 
 
-exports = [rps_by_vhost]
+exports = [rps_by]

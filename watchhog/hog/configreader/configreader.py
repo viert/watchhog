@@ -156,8 +156,8 @@ def parse_collector_config(filename):
     DispersionPattern = re.compile(r'^dispersion\s+(\d+[smh])(?:\s+#.*)?$')
     PatternPattern = re.compile(r'^pattern\s+(.+)$')
     IndexPattern = re.compile(r'^index\s+([\w\.]+)(?:\s+#.*)?$')
-    PostProcessPattern = re.compile(r'^postprocess\s+([\w\.]+)\(((?:[^\s,]+)(?:\s*,\s*(?:[^\s,]+))*)?\)(?:\s+#.*)?$')
-    SetVarPattern = re.compile(r'^setvar\s+(\w+)\s*=\s*([\w\.]+)\(((?:[^\s,]+)(?:\s*,\s*(?:[^\s,]+))*)?\)(?:\s+#.*)?$')
+    PostProcessPattern = re.compile(r'^postprocess\s+([\w\.]+)\((.*)\)(?:\s+#.*)?$')
+    SetVarPattern = re.compile(r'^setvar\s+(\w+)\s*=\s*([\w\.]+)\((.*)\)(?:\s+#.*)?$')
 
     config = {
         'index': [],
@@ -209,7 +209,7 @@ def parse_collector_config(filename):
             if m.group(3) is None:
                 args = []
             else:
-                args = parse_arguments_list(m.group(2), filename, index)
+                args = parse_arguments_list(m.group(3), filename, index)
             config['vars'][varname] = { 'function': function, 'args': [x.strip().strip('"').strip("'") for x in args] }
         else:
             raise ConfigurationParseError("Parse error", filename, index)
@@ -225,6 +225,8 @@ class TestConfigReader(unittest.TestCase):
         self.assertEqual(['abc', 'def', '19', 'some spaced arg\''], args)
         args = parse_arguments_list('status', 'filename', 0)
         self.assertEqual(['status'], args)
+        args = parse_arguments_list('datetime, " ", date, time', "filename", 0)
+        self.assertEqual(['datetime', ' ', 'date', 'time'], args)
 
 if __name__ == '__main__':
     unittest.main()

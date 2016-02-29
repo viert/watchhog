@@ -54,6 +54,18 @@ class Watcher(object):
                         continue
                     postprocess.append(func_declaration)
 
+                variables = {}
+                for varname, item in c['vars'].items():
+                    try:
+                        func_declaration = {
+                            'function': self.functions[item['function']],
+                            'args': item['args']
+                        }
+                    except KeyError:
+                        logging.error('No function %s found for variable "%s" in config file %s' % (item['function'], varname, f))
+                        continue
+                    variables[varname] = func_declaration
+
                 self.tables[collector_name] = Store(index_fields)
 
                 try:
@@ -61,12 +73,13 @@ class Watcher(object):
                 except ValueError as e:
                     logging.error("[Watcher] %s. collector skipped" % str(e))
                     continue
-                task = Task(c, parser, postprocess)
+                task = Task(c, parser, postprocess, variables)
                 self.tasks.append(task)
 
     def import_plugins(self):
         sys.path.append(self.plugin_dir)
         for python_file in os.listdir(self.plugin_dir):
+            if not python_file.endswith('.py'): continue
             module_name = os.path.splitext(os.path.basename(python_file))[0]
             try:
                 i = __import__(module_name)

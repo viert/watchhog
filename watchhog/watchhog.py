@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 from hog.watcher.watcher import Watcher
 from hog.configreader import parse_main_config
+from hog.web.web import WatchFlask, server
 from optparse import OptionParser
-import logging
-import time
 import sys
 import os
 import signal
@@ -56,7 +55,9 @@ def start_daemon(mainfunc, pidfile, termfunc=__default_term_handler):
 
 def start():
     watcher.start()
-    time.sleep(100)
+    WatchFlask.setWatcher(watcher)
+    server.run(debug=True)
+
 
 
 if __name__ == '__main__':
@@ -69,8 +70,8 @@ if __name__ == '__main__':
         sys.exit(1)
 
     config = parse_main_config(options.configfile)
-
     watcher = Watcher(config['collectors_directory'], config['log'], config['plugins_directory'], config['threads'], config['loglevel'])
+
     if options.background:
         start_daemon(start, config['pidfile'])
     else:
