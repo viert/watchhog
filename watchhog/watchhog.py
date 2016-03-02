@@ -62,7 +62,7 @@ def start():
 
 if __name__ == '__main__':
     parser = OptionParser()
-    parser.add_option('-c', '--config', dest="configfile", help="main watchhog configuration file")
+    parser.add_option('-c', '--config', dest="configfile", help="main watchhog configuration file", default="/etc/watchhog/watchhog.conf")
     parser.add_option('-b', '--background', dest="background", action="store_true", help="stay in background")
     (options, args) = parser.parse_args()
     if options.configfile is None:

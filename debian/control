@@ -8,5 +8,5 @@ Homepage: http://viert.fm
 
 Package: watchhog
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-python1.55.0
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-python1.55.0, python-flask
 Description: Fast log parser and indexer

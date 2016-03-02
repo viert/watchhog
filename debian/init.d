@@ -14,10 +14,10 @@
 # Author: Pavel Vorobyov <aquavitale@yandex.ru>
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC=watchhog               # Introduce a short description here
-NAME=watchhog               # Introduce the short server's name here
-DAEMON=/usr/sbin/watchhog   # Introduce the server's location here
-DAEMON_ARGS=""              # Arguments to run the daemon with
+DESC=watchhog                  # Introduce a short description here
+NAME=watchhog                  # Introduce the short server's name here
+DAEMON=/usr/sbin/watchhog.py   # Introduce the server's location here
+DAEMON_ARGS=""                 # Arguments to run the daemon with
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
