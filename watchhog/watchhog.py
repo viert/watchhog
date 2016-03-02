@@ -34,7 +34,7 @@ def start_daemon(mainfunc, pidfile, termfunc=__default_term_handler):
         raise Exception("%s [%d]" % (e.strerror, e.errno))
 
     if pid == 0:
-        os.closerange(0,2)
+        os.closerange(0,3)
         os.setsid()
         try:
             pid = os.fork()
