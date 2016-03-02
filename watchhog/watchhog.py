@@ -63,7 +63,7 @@ def start():
 if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option('-c', '--config', dest="configfile", help="main watchhog configuration file", default="/etc/watchhog/watchhog.conf")
-    parser.add_option('-b', '--background', dest="background", action="store_true", help="stay in background")
+    parser.add_option('-f', '--foreground', dest="foreground", action="store_true", help="stay in foreground")
     (options, args) = parser.parse_args()
     if options.configfile is None:
         parser.print_help()
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     config = parse_main_config(options.configfile)
     watcher = Watcher(config['collectors_directory'], config['log'], config['plugins_directory'], config['threads'], config['loglevel'])
 
-    if options.background:
-        start_daemon(start, config['pidfile'])
-    else:
+    if options.foreground:
         start()
+    else:
+        start_daemon(start, config['pidfile'])
