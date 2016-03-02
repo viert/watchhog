@@ -106,6 +106,5 @@ class Worker(StoppableThread):
         except Exception as e:
             logging.error("[Worker #%d] Exception in thread: %s" % (self.thread_id, repr(e)))
             self.stop()
-            raise
 
         self.state = 'stopped'

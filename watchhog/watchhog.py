@@ -53,12 +53,15 @@ def start_daemon(mainfunc, pidfile, termfunc=__default_term_handler):
         os._exit(0)
 
 
-def start():
+def start_debug():
     watcher.start()
     WatchFlask.setWatcher(watcher)
     server.run(debug=True)
 
-
+def start():
+    watcher.start()
+    WatchFlask.setWatcher(watcher)
+    server.run()
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -73,6 +76,6 @@ if __name__ == '__main__':
     watcher = Watcher(config['collectors_directory'], config['log'], config['plugins_directory'], config['threads'], config['loglevel'])
 
     if options.foreground:
-        start()
+        start_debug()
     else:
         start_daemon(start, config['pidfile'])
