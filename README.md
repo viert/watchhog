@@ -61,3 +61,69 @@ Number of workers. Theese are python threads so you can't use more than one CPU 
 
 Collector configuration
 -----------------------
+
+Watchhogs looks into `collectors directory` and tries to load every file with `.conf` extension. Other files would be ignored so distribution-arrived `nginx.conf.example` will never be used until you rename in to `nginx.conf`. Every collector are configured with the following options:
+
+```
+name                nginx
+```
+This is the collector name. It should be unique. Otherwise you'll have the only one collector, the last one watchhog had found in the directory.
+
+```
+log                 /var/log/nginx/access.log
+```
+The logfile collector handles
+
+```
+period              1m
+dispersion          5s
+```
+Watchhog will read the new portion of log every `period` plus-minus `dispersion`. The dispersion option is used to minimize disk load (with two or more logs handled watchhog will not read them at once but with a random delay)
+
+```
+pattern             [$datetime $-] $vhost $ip "$method $url $-" $status "$referer" "$useragent" "$cookies" $time
+```
+Parser configuration. The most complex option. Will be described below.
+
+```
+index               datetime
+index               status.vhost
+```
+This option tells watchhog which fields to index. Compound indexes can have only one multiplicity level. Indexes are python structures built the following way. Let's say you have some lines of log:
+```
+[2016-02-18 12:34:30] example.com "GET /ping HTTP/1.0" 200
+[2016-02-18 12:34:30] example.com "GET /not_exist HTTP/1.0" 404
+[2016-02-18 12:34:31] example2.com "GET /ping HTTP/1.0" 200
+[2016-02-18 12:34:32] example2.com "GET /not_exist HTTP/1.0" 200
+```
+With the configuration above watchhog will build the following structures
+```python
+# datetime index
+index['datetime']['index'] = {
+  '2016-02-18 12:34:30' : [0, 1],
+  '2016-02-18 12:34:31' : [2],
+  '2016-02-18 12:34:32' : [3]
+}
+index['datetime']['counters'] = {
+  '2016-02-18 12:34:30' : 2,
+  '2016-02-18 12:34:31' : 1,
+  '2016-02-18 12:34:32' : 1
+}
+index['datetime']['keys'] = [ '2016-02-18 12:34:30', '2016-02-18 12:34:31', '2016-02-18 12:34:32' ]
+
+# status.vhost index
+index['status.vhost']['index'] = {
+  '200': {
+    'example.com': [0],
+    'example2.com': [2]
+  },
+  '404': {
+    'example.com': [1],
+    'example2.com': [3]
+  }
+}
+index['status.vhost']['counters'] = {
+  '200': { 'example.com': 1, 'example2.com': 1 },
+  '404': { 'example.com': 1, 'example2.com': 1 }
+}
+```
