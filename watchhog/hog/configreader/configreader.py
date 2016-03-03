@@ -28,7 +28,13 @@ class ConfigurationParseError(StandardError):
         self.filename = filename
         self.lineno = lineno + 1
 
+
 def parse_arguments_list(line, filename, index):
+
+    # empty args optimisation
+    if line == '':
+        return []
+
     WAIT_ARG = 0
     READ_QUOTED_ARG = 1
     READ_APOSTROPHED_ARG = 2
@@ -227,6 +233,8 @@ class TestConfigReader(unittest.TestCase):
         self.assertEqual(['status'], args)
         args = parse_arguments_list('datetime, " ", date, time', "filename", 0)
         self.assertEqual(['datetime', ' ', 'date', 'time'], args)
+        args = parse_arguments_list('', "filename", 0)
+        self.assertEqual([], args)
 
 if __name__ == '__main__':
     unittest.main()
