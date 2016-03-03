@@ -49,30 +49,47 @@ class Store(object):
 
         if len(keyparts) == 1:
             keys = set()
+
             for i, record in enumerate(self.table):
-                self.indexes[field]['index'][record[field]].append(i)
-                self.indexes[field]['counter'][record[field]] += 1
-                keys.add(record[field])
+                try:
+                    field_value = record[field]
+                except KeyError:
+                    continue
+                self.indexes[field]['index'][field_value].append(i)
+                self.indexes[field]['counter'][field_value] += 1
+                keys.add(field_value)
+
             self.indexes[field]['keys'] = list(keys)
             self.indexes[field]['keys'].sort()
+
         else:
             (first, second) = keyparts
             for i, record in enumerate(self.table):
-                self.indexes[field]['index'][record[first]][record[second]].append(i)
-                self.indexes[field]['counter'][record[first]][record[second]] += 1
+                try:
+                    self.indexes[field]['index'][record[first]][record[second]].append(i)
+                    self.indexes[field]['counter'][record[first]][record[second]] += 1
+                except KeyError:
+                    continue
 
     def __add_record_to_index(self, record, field, i):
         keyparts = field.split('.')
         if len(keyparts) == 1:
-            self.indexes[field]['index'][record[field]].append(i)
-            self.indexes[field]['counter'][record[field]] += 1
-            if not record[field] in self.indexes[field]['keys']:
-                self.indexes[field]['keys'].append(record[field])
+            try:
+                field_value = record[field]
+            except KeyError:
+                return
+            self.indexes[field]['index'][field_value].append(i)
+            self.indexes[field]['counter'][field_value] += 1
+            if not field_value in self.indexes[field]['keys']:
+                self.indexes[field]['keys'].append(field_value)
                 self.indexes[field]['keys'].sort()
         else:
             (first, second) = keyparts
-            self.indexes[field]['index'][record[first]][record[second]].append(i)
-            self.indexes[field]['counter'][record[first]][record[second]] += 1
+            try:
+                self.indexes[field]['index'][record[first]][record[second]].append(i)
+                self.indexes[field]['counter'][record[first]][record[second]] += 1
+            except KeyError:
+                return
 
     def reindex_all(self):
         for field in self.indexes:
