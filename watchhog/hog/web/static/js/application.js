@@ -1,16 +1,24 @@
 var watchCtrl = angular.module('watchCtrl', []);
 
-watchCtrl.run([ '$rootScope', '$sce', function($scope, $sce) {
+watchCtrl.run([ '$rootScope', '$sce', '$route', function($scope, $sce, $route) {
     $scope.formatArgs = function(args) {
         var result = [];
         for (var i in args) {
             result.push('<span class="text-danger">"' + args[i] + '"</span>');
         }
         return $sce.trustAsHtml( result.join(", ") );
-    }
+    };
+
+    $scope.activeMenuItem = function(section) {
+
+        return $route.current && $route.current.section && $route.current.section == section;
+    };
+
+    $scope.global = {};
 }]);
 
 var OverviewController = watchCtrl.controller('OverviewController', [ '$scope', '$http', '$timeout', function($scope, $http, $timeout) {
+    if ($scope.global.updater) $timeout.cancel($scope.global.updater);
     $scope.getData = function() {
         $http.get('/api/stats/threads')
             .then(function(data) {
@@ -19,15 +27,16 @@ var OverviewController = watchCtrl.controller('OverviewController', [ '$scope', 
         $http.get('/api/stats/tasks')
             .then(function(data) {
                 $scope.tasks = data.data.tasks;
-                $timeout($scope.getData, 1000);
+                $scope.global.updater = $timeout($scope.getData, 1000);
             }, function() {
-                $timeout($scope.getData, 1000);
+                $scope.global.updater = $timeout($scope.getData, 1000);
             });
     };
     $scope.getData();
 }]);
 
-var StoreListController = watchCtrl.controller('StoreListController', [ '$scope', '$http', function($scope, $http) {
+var StoreListController = watchCtrl.controller('StoreListController', [ '$scope', '$http', '$timeout', function($scope, $http, $timeout) {
+    if ($scope.global.updater) $timeout.cancel($scope.global.updater);
     $scope.tables = {};
     $scope.getData = function() {
         $http.get('/api/tables').then(function(data) {

@@ -61,9 +61,18 @@ def table_overview(table):
     variables = store.vars.keys()
     variables = [{ 'name': x, 'link': "http://%s/api/tables/%s/variables/%s" % (get_host_header(), table, x)} for x in variables]
 
+    indexes = []
+    for key, index in store.indexes.items():
+        data = {
+            'name': key,
+            'type': 'simple' if 'keys' in index else 'compound',
+            'keys_count': len(index['keys']) if 'keys' in index else len(index['index'])
+        }
+        indexes.append(data)
+
     data = {
         'name': table,
-        'index_fields': store.indexes.keys(),
+        'indexes': indexes,
         'variables': variables,
         'record_count': len(store.table),
         'data_link': "http://%s/api/tables/%s/data" % (get_host_header(), table)
