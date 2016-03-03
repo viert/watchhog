@@ -38,7 +38,7 @@ class Task(object):
     def to_dict(self):
         variables = {}
         for varname, x in self.vars.items():
-            variables['varname'] = { 'function': "%s.%s" % ( x['function'].__module__, x['function'].__name__ ), 'args': x['args'] }
+            variables[varname] = { 'function': "%s.%s" % ( x['function'].__module__, x['function'].__name__ ), 'args': x['args'] }
 
         return {
             'collector': {

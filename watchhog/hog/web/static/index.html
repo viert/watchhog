@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="watchApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Watchhog</title>
+    <link rel="stylesheet" href="css/bootstrap-flatly.min.css"/>
+    <link rel="stylesheet" href="css/application.css"/>
+    <script type="application/javascript" src="js/libs/angular.min.js"></script>
+    <script type="application/javascript" src="js/libs/angular-route.min.js"></script>
+    <script type="application/javascript" src="js/application.js"></script>
+</head>
+<body>
+    <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">WatchHog</a>
+            </div>
+
+            <div>
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#/overview">Overview</a></li>
+                    <li><a href="#/store">Data Stores</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="container">
+            <ng-view></ng-view>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<h2>Data Stores</h2>
+<div class="row">
+    <div class="col-lg-4" ng-repeat="(tablename, table) in tables">
+        <h3><a ng-href="#/store/{{ tablename }}">{{ tablename }}</a> ({{table.record_count}} records)</h3>
+        <div class="indent">
+            <div class="section-header">FIELD NAMES</div>
+            <div ng-repeat="field in table.field_names">
+                <span class="text-info">{{ field }}</span>
+            </div>
+            <div class="section-header">INDEXES</div>
+            <div ng-repeat="index in table.index_fields">
+                <span class="text-info">{{ index }}</span>
+            </div>
+            <div class="section-header">VARIABLES</div>
+            <div ng-repeat="var in table.variables">
+                <a ng-href="{{var.link}}" target="_blank">{{ var.name }}</a>
+            </div>
+        </div>
+
+    </div>
+</div>
