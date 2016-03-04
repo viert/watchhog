@@ -56,7 +56,7 @@ Directory for the daemon's plugins. By default watchhog arrives with a couple of
 ```
 threads               10
 ```
-Number of workers. Theese are python threads so you can't use more than one CPU core actually. Multithreading makes it real to process more than one log simultaneously.
+Number of workers. These are python threads so you can't use more than one CPU core actually. Multithreading makes it real to process more than one log simultaneously.
 
 
 Collector configuration
@@ -64,15 +64,18 @@ Collector configuration
 
 Watchhogs looks into `collectors directory` and tries to load every file with `.conf` extension. Other files would be ignored so distribution-arrived `nginx.conf.example` will never be used until you rename in to `nginx.conf`. Every collector are configured with the following options:
 
+
 ```
 name                nginx
 ```
 This is the collector name. It should be unique. Otherwise you'll have the only one collector, the last one watchhog had found in the directory.
 
+
 ```
 log                 /var/log/nginx/access.log
 ```
 The logfile collector handles
+
 
 ```
 period              1m
@@ -80,22 +83,84 @@ dispersion          5s
 ```
 Watchhog will read the new portion of log every `period` plus-minus `dispersion`. The dispersion option is used to minimize disk load (with two or more logs handled watchhog will not read them at once but with a random delay)
 
+
 ```
 pattern             [$datetime $-] $vhost $ip "$method $url $-" $status "$referer" "$useragent" "$cookies" $time
 ```
 Parser configuration. The most complex option. Will be described below.
 
+
 ```
 index               datetime
 index               status.vhost
 ```
-This option tells watchhog which fields to index. Compound indexes can have only one multiplicity level. Indexes are python structures built the following way. Let's say you have some lines of log:
+This option tells watchhog which fields to index. Compound indexes can have only one multiplicity level. Indexes are described below.
+
+
+```
+postprocess postprocess.to_datetime(datetime, "%d/%b/%Y:%H:%M:%S")
+```
+**postprocess** directive describes how to modify record after every line is parsed. In this example *postprocess.to_datetime* is the name of module and function in watchhog plugin directory (postprocess module is distributed with watchhog itself). *postprocess.to_datetime* function actually converts field named 'datetime' to python datetime format using *"%d/%b/%Y:%H:%M:%S"* parsing configuration. Plugins mechanism is powerful and it's described in section **Plugins** below.
+
+```
+setvar rps = accesslog.rps_by(vhost)
+```
+**setvar** directive makes watchdog create a variable (called **rps** in example above) and assign the return value of function following.
+
+
+How the heck does it work exactly?
+==================================
+
+Filekeeper
+----------
+
+Watchhog creates a so called Filekeeper that tracks the logfile, reopens it after logrotate and so on. Every *period* scheduler creates task to poll the new data from log. One of workers (number of workers are configured with *threads* option) takes the task and asks Filekeeper to read the new data from log file. Filekeeper reads the file from previous position up to the end, reopens the new file, if it was rotated within the period and reads it up to the end too.
+
+
+Parser
+------
+
+The next step is parsing. Every line of logfile portion is being parsed to create a *record* - actually a simple python dict. Every record is a key/value, where keys are field names configured in *pattern* and values are strings. Often strings are not convinient type of data, especially when you know exactly what type of data the particular field holds. Here goes *postprocess* functions. This is where the magic begins.
+
+Postprocess
+-----------
+
+When each record is created, Watchhog runs postprocess functions passing the record as the first argument and the other arguments configured right behind. For example we have http status code field called **status** and we sure it's always integer. Configuration says:
+```
+postprocess postprocess.to_int(status)
+```
+
+Which means exactly *Run the function **to_int** from the **postprocess** module and pass current **record** and string 'status' as arguments.*
+*to_int()* is a built-in function and it looks just like this:
+```python
+def to_int(record, key, base=10, default=None):
+    try:
+        record[key] = int(record[key], base)
+    except ValueError:
+        if not default is None:
+            record[key] = default
+```
+As you can see, the record['status'] will be a type of int after function running.
+
+
+Indexes
+-------
+
+The next important step is indexing. Indexes help watchhog (and us finally) to search particular records in store table.
+Indexes are python structures built the following way. Let's say you have some lines of log:
 ```
 [2016-02-18 12:34:30] example.com "GET /ping HTTP/1.0" 200
 [2016-02-18 12:34:30] example.com "GET /not_exist HTTP/1.0" 404
 [2016-02-18 12:34:31] example2.com "GET /ping HTTP/1.0" 200
 [2016-02-18 12:34:32] example2.com "GET /not_exist HTTP/1.0" 200
 ```
+
+And you have the index configuration like that:
+```
+index               datetime
+index               status.vhost
+```
+
 With the configuration above watchhog will build the following structures
 ```python
 # datetime index
@@ -127,3 +192,37 @@ index['status.vhost']['counters'] = {
   '404': { 'example.com': 1, 'example2.com': 1 }
 }
 ```
+
+`status.vhost` is a compound index useful from time to time. Compound idexes are two-field indexes exactly. There's no way to build index more than of two fields yet.
+
+
+Variables
+---------
+
+So we have now the table that consist of all parsed lines in the last portion of log (previous part was dropped to free memory, watchhog is a tool for just-right-now monitoring), some fields are converted to convinient type, everything is indexed. Now we can group and reduce with the mechanism of variables.
+```
+setvar rps = accesslog.rps_by(vhost)
+```
+This configuration will tell Watchhog to run function *rps_by* from module *accesslog* and pass the datastore as the first argument and the string 'vhost' as the second one.
+`datastore` is the python object with properties: 
+
+`table`, which holds the list of records
+
+`indexes`, which holds indexes
+
+`vars`, which holds the dict of store variables
+
+You do not have to create the var in your own function, you have just to return the value. For example, function *rps_by* creates a key/value dict where keys are the unique field values (let's say you have access log with `example.com` and `example2.com` vhosts occuring in it, so the keys are `example.com` and `example2.com` exactly) and the values are request-per-second for the particular vhost. Finally it adds the key __total__ with the sum of all rps values.
+
+
+
+HTTP
+----
+
+Finally Watchhog has a HTTP interface. Mostly you need the following handlers:
+
+`/api/tables/<tablename>/data` - list of records in JSON
+`/api/tables/<tablename>/variables/<varname>` - value of variable *varname* in particular *table* in JSON
+
+You can get the data using curl or any other http client periodically and send the data to your favorite graph system (e.g. graphite or cacti), save statistics and write scripts for monitoring (e.g. nagios, zabbix and so forth)
+
