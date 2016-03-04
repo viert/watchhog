@@ -9,7 +9,8 @@ import signal
 import atexit
 
 watcher = None
-
+host = None
+port = None
 
 def __default_term_handler(signalnum, frame):
     sys.exit(0)
@@ -56,12 +57,12 @@ def start_daemon(mainfunc, pidfile, termfunc=__default_term_handler):
 def start_debug():
     watcher.start()
     WatchFlask.setWatcher(watcher)
-    server.run(debug=True)
+    server.run(host=host, port=port, debug=True)
 
 def start():
     watcher.start()
     WatchFlask.setWatcher(watcher)
-    server.run()
+    server.run(host=host, port=port)
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -73,6 +74,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     config = parse_main_config(options.configfile)
+    host, port = config['bind']
     watcher = Watcher(config['collectors_directory'], config['log'], config['plugins_directory'], config['threads'], config['loglevel'])
 
     if options.foreground:
