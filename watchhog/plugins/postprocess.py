@@ -35,7 +35,9 @@ def join(record, new_field, delimiter, *args):
         logging.error("Error in postprocess.join(): " + str(e))
 
 
-def split(record, field, delimiter, new_field):
+def split(record, field, delimiter, new_field=None):
+    if new_field is None:
+        new_field = field
     try:
         array = record[field].split(delimiter)
     except Exception as e:
