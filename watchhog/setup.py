@@ -25,6 +25,17 @@ config = {
         'version': get_version(),
         'description': 'WatchHog is a fast log watcher and parser',
         'packages': find_packages(),
+        'include_package_data': True,
+        'package_data': { 
+            'hog.web': [
+                'static/*.html',
+                'static/css/*.css',
+                'static/js/*.js',
+                'static/js/libs/*.js',
+                'static/img/*.png',
+                'static/templates/*.html'
+            ] 
+        },
         'scripts': [os.path.join(cdir, 'watchhog.py')],
         'author': 'Pavel Vorobyov',
         'author_email': 'aquavitale@yandex.ru',
