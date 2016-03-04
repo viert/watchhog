@@ -1,3 +1,9 @@
+watchhog (0.1.11) unstable; urgency=medium
+
+  * static build fixes
+
+ -- Pavel Vorobyov <viert@yandex-team.ru>  Fri, 04 Mar 2016 15:29:18 +0300
+
 watchhog (0.1.10) unstable; urgency=medium
 
   * in place split()
