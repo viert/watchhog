@@ -8,6 +8,8 @@ import os
 import signal
 import atexit
 
+DEFAULT_CONFIG="/etc/watchhog/watchhog.conf"
+
 watcher = None
 host = None
 port = None
@@ -66,7 +68,7 @@ def start():
 
 if __name__ == '__main__':
     parser = OptionParser()
-    parser.add_option('-c', '--config', dest="configfile", help="main watchhog configuration file", default="/etc/watchhog/watchhog.conf")
+    parser.add_option('-c', '--config', dest="configfile", help="main watchhog configuration file", default=DEFAULT_CONFIG)
     parser.add_option('-f', '--foreground', dest="foreground", action="store_true", help="stay in foreground")
     (options, args) = parser.parse_args()
     if options.configfile is None:
@@ -81,3 +83,9 @@ if __name__ == '__main__':
         start_debug()
     else:
         start_daemon(start, config['pidfile'])
+else:
+    # uwsgi entry point. default config
+    config = parse_main_config(DEFAULT_CONFIG)
+    watcher = Watcher(config['collectors_directory'], config['log'], config['plugins_directory'], config['threads'], config['loglevel'])
+    watcher.start()
+    WatchFlask.setWatcher(watcher)

@@ -1,7 +1,6 @@
 import os
 from flask import Flask, jsonify, make_response, send_file, request
 
-
 class WatchFlask(Flask):
     def __init__(self, *args, **kwargs):
         Flask.__init__(self, *args, **kwargs)
@@ -11,7 +10,7 @@ class WatchFlask(Flask):
         cls.watcher = watcher
 
 
-static_folder = os.path.join(os.path.dirname(__file__), 'static')
+static_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static')
 server = WatchFlask(__name__, static_url_path='', static_folder=static_folder)
 
 
@@ -29,6 +28,7 @@ def get_tasks():
 
 @server.route("/")
 def index():
+    print "index()"
     return send_file(os.path.join(static_folder, 'index.html'))
 
 
