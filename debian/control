@@ -9,5 +9,5 @@ Vcs-Git: git://github.com/viert/watchhog.git
 
 Package: watchhog
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-python1.55.0, python-flask, python-support, python-dateutil
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-python1.55.0, python-flask, python-support, python-dateutil, uwsgi, uwsgi-plugin-python
 Description: Fast log parser and indexer
