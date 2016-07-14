@@ -1,3 +1,9 @@
+watchhog (0.1.12) unstable; urgency=medium
+
+  * uwsgi support
+
+ -- Pavel Vorobyov <viert@yandex-team.ru>  Thu, 14 Jul 2016 13:40:54 +0300
+
 watchhog (0.1.11) unstable; urgency=medium
 
   * static build fixes
