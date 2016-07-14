@@ -1,3 +1,9 @@
+watchhog (0.1.14-1) unstable; urgency=medium
+
+  * one process of watchhog only. hotfix
+
+ -- Pavel Vorobyov <viert@yandex-team.ru>  Thu, 14 Jul 2016 14:03:14 +0300
+
 watchhog (0.1.14) unstable; urgency=medium
 
   * initscript removed from build, use uwsgi
