@@ -1,3 +1,9 @@
+watchhog (0.1.15) unstable; urgency=medium
+
+  * Logo added
+
+ -- Pavel Vorobyov <viert@yandex-team.ru>  Thu, 14 Jul 2016 17:53:03 +0300
+
 watchhog (0.1.14-3) unstable; urgency=medium
 
   * single-interpreter uwsgi
