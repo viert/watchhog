@@ -130,7 +130,7 @@ When each record is created, Watchhog runs postprocess functions passing the rec
 postprocess postprocess.to_int(status)
 ```
 
-Which means exactly *Run the function **to_int** from the **postprocess** module and pass current **record** and string 'status' as arguments.*
+Which means exactly *Run the function* **to_int** *from the* **postprocess** *module and pass current* **record** *and string 'status' as arguments.*
 *to_int()* is a built-in function and it looks just like this:
 ```python
 def to_int(record, key, base=10, default=None):
