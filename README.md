@@ -226,3 +226,35 @@ Finally Watchhog has a HTTP interface. Mostly you need the following handlers:
 
 You can get the data using curl or any other http client periodically and send the data to your favorite graph system (e.g. graphite or cacti), save statistics and write scripts for monitoring (e.g. nagios, zabbix and so forth)
 
+
+uWSGI
+=====
+
+Since version 0.1.15 watchhog uses uwsgi by default though it does not require it (except debian packaged version that does). The common uWSGI config will look like
+
+```
+[uwsgi]
+plugins = python,http
+wsgi-file = /usr/sbin/watchhog.py
+callable = server
+
+master = false
+need-app = true
+processes = 1
+enable-threads = true
+single-interpreter = true
+
+
+http = 0.0.0.0:4000
+uid = root
+```
+
+This configuration allows you to run watchhog without frontend nginx or another webserver, uWSGI daemon will handle http interface for you.
+The things you should remember when you configure uwsgi manually are:
+
+- master option should be false. watchhog requires only one process to run at a moment, so you don't need master/multiworkers uwsgi mechanism.
+- need-app must be set to true to prevent uwsgi from starting empty: remember that watchhog must start its worker threads no matter if you ask it for data via http or don't
+- processes should be set to 1 (see the explanation of master option)
+- enable-threads must be set to true to enable uwsgi python interpreter threads. watchhog uses at least 2 threads: one for frontend interface and one for data collection and processing.
+- single-interpreter must be set to true for the same reason you set processes option to 1
+- you can set uid to whatever you want but be sure watchhog can read your logs you want to parse
