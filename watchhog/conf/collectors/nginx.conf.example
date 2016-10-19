@@ -7,8 +7,12 @@ pattern [$datetime $-] $vhost $ip "$method $url $-" $status "$referer" "$userage
 index datetime
 index vhost
 index status.vhost
+index vhost.time
+
 postprocess postprocess.to_datetime(datetime, "%d/%b/%Y:%H:%M:%S")
 postprocess postprocess.to_int(status)
 
 setvar rps = accesslog.count_rps_by_vhost()
 setvar m500 = accesslog.count_500_by_vhost()
+setvar timings = accesslog.timings(time)
+setvar timings_by_vhost = accesslog.timings_by(vhost, time)
