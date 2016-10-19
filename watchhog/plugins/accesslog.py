@@ -45,4 +45,11 @@ def timings(store, request_time_field_name=None):
         logging.error("timings(%s) needs the field %s indexed" % (request_time_field_name, request_time_field_name))
     return counters
 
-exports = [rps_by, timings_by, timings]
+def status_codes_by_vhost(store, vhost_field='vhost', status_field='status'):
+    index_key = '%s.%s' % (vhost_field, status_field)
+    counters = store.get_field_counter(index_key)
+    if counters is None:
+        logging.error("status_codes_by_vhost needs index by %s" % index_key)
+    return counters
+
+exports = [rps_by, timings_by, timings, status_codes_by_vhost]
