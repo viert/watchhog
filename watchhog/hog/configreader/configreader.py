@@ -19,6 +19,15 @@ MAIN_DEFAULTS = {
     'collectors_directory': '/etc/watchhog/collectors'
 }
 
+NamePattern = re.compile(r'^name\s+(\w+)(?:\s+#.*)?$')
+LogPattern = re.compile(r'^log\s+([^\s]+)(?:\s+#.*)?$')
+PeriodPattern = re.compile(r'^period\s+(\d+[smh])(?:\s+#.*)?$')
+DispersionPattern = re.compile(r'^dispersion\s+(\d+[smh])(?:\s+#.*)?$')
+PatternPattern = re.compile(r'^pattern\s+(.+)$')
+IndexPattern = re.compile(r'^index\s+([\w\.]+)(?:\s+#.*)?$')
+PostProcessPattern = re.compile(r'^postprocess\s+([\w\.]+)\((.*)\)(?:\s+#.*)?$')
+SetVarPattern = re.compile(r'^setvar\s+(\w+)\s*=\s*([\w\.]+)\((.*)\)(?:\s+#.*)?$')
+
 COLLECTOR_FIELDS = [ 'name', 'log', 'pattern', 'index', 'period', 'dispersion', 'postprocess', 'vars' ]
 
 class ConfigurationParseError(StandardError):
@@ -154,16 +163,16 @@ def parse_main_config(filename):
 
     return config
 
-def parse_collector_config(filename):
 
-    NamePattern = re.compile(r'^name\s+(\w+)(?:\s+#.*)?$')
-    LogPattern = re.compile(r'^log\s+([^\s]+)(?:\s+#.*)?$')
-    PeriodPattern = re.compile(r'^period\s+(\d+[smh])(?:\s+#.*)?$')
-    DispersionPattern = re.compile(r'^dispersion\s+(\d+[smh])(?:\s+#.*)?$')
-    PatternPattern = re.compile(r'^pattern\s+(.+)$')
-    IndexPattern = re.compile(r'^index\s+([\w\.]+)(?:\s+#.*)?$')
-    PostProcessPattern = re.compile(r'^postprocess\s+([\w\.]+)\((.*)\)(?:\s+#.*)?$')
-    SetVarPattern = re.compile(r'^setvar\s+(\w+)\s*=\s*([\w\.]+)\((.*)\)(?:\s+#.*)?$')
+def parse_pattern(line):
+    pattern = PatternPattern.match(line).group(1)
+    pattern = pattern\
+        .replace('\\t', '\t')\
+        .replace('\\n', '\n')
+    return pattern
+
+
+def parse_collector_config(filename):
 
     config = {
         'index': [],
@@ -195,7 +204,8 @@ def parse_collector_config(filename):
         elif PatternPattern.match(line):
             if 'pattern' in config:
                 raise ConfigurationParseError('Duplicate pattern directive', filename, index)
-            config['pattern'] = PatternPattern.match(line).group(1)
+            config['pattern'] = parse_pattern(line)
+
         elif IndexPattern.match(line):
             config['index'].append(IndexPattern.match(line).group(1))
         elif PostProcessPattern.match(line):
@@ -225,6 +235,7 @@ def parse_collector_config(filename):
             config[key] = COLLECTOR_DEFAULTS[key]
     return config
 
+
 class TestConfigReader(unittest.TestCase):
     def test_argument_parser(self):
         args = parse_arguments_list('"abc",\'def\' ,19, "some spaced arg\'" ', "filename", 0)
@@ -235,6 +246,11 @@ class TestConfigReader(unittest.TestCase):
         self.assertEqual(['datetime', ' ', 'date', 'time'], args)
         args = parse_arguments_list('', "filename", 0)
         self.assertEqual([], args)
+
+    def test_pattern_parser(self):
+        line = r"pattern [$datetime]\t$vhost"
+        self.assertEqual(parse_pattern(line), '[$datetime]\t$vhost')
+
 
 if __name__ == '__main__':
     unittest.main()

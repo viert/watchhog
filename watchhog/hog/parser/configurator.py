@@ -114,5 +114,18 @@ class TestConfigurator(unittest.TestCase):
         self.assertTrue(parser.parseLine(LOGLINE+"\n"))
         self.assertDictEqual(parser.getResults(), expectedResults)
 
+    def test_configure_tabs(self):
+        LOGLINE = '[18/Feb/2016:00:39:05 +0300]\texport.yandex.ru\t213.180.201.1'
+        PATTERN = '[$datetime $-]\t$vhost\t$ip'
+        expectedResults = {
+            'datetime': '18/Feb/2016:00:39:05',
+            'vhost': 'export.yandex.ru',
+            'ip': '213.180.201.1'
+        }
+        parser = configure(PATTERN)
+        self.assertTrue(parser.parseLine(LOGLINE+"\n"))
+        self.assertDictEqual(parser.getResults(), expectedResults)
+
+
 if __name__ == '__main__':
     unittest.main()
