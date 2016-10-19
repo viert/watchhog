@@ -1,3 +1,21 @@
+watchhog (0.1.18) unstable; urgency=medium
+
+  * New accesslog plugin functions
+
+ -- Pavel Vorobyov <viert@yandex-team.ru>  Wed, 19 Oct 2016 15:53:54 +0300
+
+watchhog (0.1.17) unstable; urgency=medium
+
+  * Timings added
+
+ -- Pavel Vorobyov <viert@yandex-team.ru>  Wed, 19 Oct 2016 15:27:20 +0300
+
+watchhog (0.1.16) unstable; urgency=medium
+
+  * Tab symbol pattern matching added
+
+ -- Pavel Vorobyov <viert@yandex-team.ru>  Wed, 19 Oct 2016 15:03:07 +0300
+
 watchhog (0.1.15) unstable; urgency=medium
 
   * Logo added
