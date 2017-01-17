@@ -1,0 +1,9 @@
+/var/log/watchhog.log {
+        missingok
+        copytruncate
+        rotate 10
+        compress
+        notifempty
+	size 30M
+	su root www-data
+}
