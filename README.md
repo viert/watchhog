@@ -4,29 +4,29 @@ Watchhog
 What?
 -----
 
-Watchhog is a fast log watcher, parser and indexer written on Python/C++. It takes log file you ask it to handle, reads it every minute (that's for example, actually you can freely configure the period option), parse with fast token parser easily configured with **pattern** option, saves the result to python structure, actually a list of dicts, then builds indexes you configure for fast searching and makes it available by http in JSON format.
+Watchhog is a fast log watcher, parser and indexer written on Python/C++. It takes a log file you ask it to handle, reads it once a minute from the last point up to the end (that's for example, actually you can freely configure the period option), parse with fast token parser easily configured with **pattern** option, saves the result to a python structure, actually a list of dicts, then builds indexes you configured for fast searching and makes it available by http in JSON format.
 
 Why?
 ----
 
-It's useful in my everyday tasks as system administrator. For example it solves the often task to answer the question "how much RPS do my server have just right now?" or to determine response timings.
+It's useful in my everyday tasks as system administrator. For example it helps to answer the question "how much RPS does my server have just right now?" or to determine response timings.
 
 Installation
 ------------
 
-Watchhog is carefully debianized and can be freely built and installed on Ubuntu Trusty. It also have to install easily with usual *setup.py* mechanism.
-You also have to install boost-python library to build the native parser. Anyway Watchhog has a pure-pythonic fallback parser though the python version of parser is dramatically slower.
-*(Native parser is available on Linux systems. The installation script was hardcoded to check platform and would fail to build native extension on any other platform except Linux. The Mac OS X version will be soon available too)*
+Watchhog is carefully debianized and can be easily built and installed on Debian/Ubuntu systems. It should install easily with usual *setup.py* mechanism as well.
+You also have to install boost-python library to build a native parser. Anyway Watchhog has a pure-pythonic fallback parser, that version of parser is dramatically slower though.
+*(Native parser is available on Linux systems. The installation script is hardcoded to check platform and would fail to build native extension on any other platform.)*
 
 Configuration
 -------------
 
-By default Watchhog reads file `/etc/watchhog/watchhog.conf` as the main configuration. The following options are available:
+By default Watchhog reads the file `/etc/watchhog/watchhog.conf` as the main configuration file. The following configuration options are available:
 
 ```
 collectors_directory  /etc/watchhog/collectors
 ```
-Directory with collectors configurations. Will be described below
+Directory with collectors configurations.
 
 ```
 log                   /var/log/watchhog.log
@@ -41,12 +41,12 @@ Daemon's log level. Standard python log levels are available, for example *info*
 ```
 pidfile               /var/run/watchhog.pid
 ```
-That's it. The pidfile. I mean it.
+That's it. A pidfile. I mean it.
 
 ```
 bind                  0.0.0.0:5000
 ```
-Host and port to bind. Host is optional, the default is 127.0.0.1. You should use 127.0.0.1 for security reasons but you have to bind on external (non-loopback) interfaces to use the Watchhog beautiful interface =)
+Host and port to bind. Host is optional, the default one is 127.0.0.1. You should use 127.0.0.1 for security reasons but you have to bind on external (non-loopback) interfaces to use the Watchhog handsome interface =)
 
 ```
 plugins_directory     /usr/share/pyshared/hog/plugins
@@ -87,7 +87,7 @@ Watchhog will read the new portion of log every `period` plus-minus `dispersion`
 ```
 pattern             [$datetime $-] $vhost $ip "$method $url $-" $status "$referer" "$useragent" "$cookies" $time
 ```
-Parser configuration. The most complex option. Will be described below.
+Parser configuration. Will be described below.
 
 
 ```
@@ -100,12 +100,12 @@ This option tells watchhog which fields to index. Compound indexes can have only
 ```
 postprocess postprocess.to_datetime(datetime, "%d/%b/%Y:%H:%M:%S")
 ```
-**postprocess** directive describes how to modify record after every line is parsed. In this example *postprocess.to_datetime* is the name of module and function in watchhog plugin directory (postprocess module is distributed with watchhog itself). *postprocess.to_datetime* function actually converts field named 'datetime' to python datetime format using *"%d/%b/%Y:%H:%M:%S"* parsing configuration. Plugins mechanism is powerful and it's described in section **Plugins** below.
+**postprocess** directive describes how to modify a record after a line is parsed. In this example *postprocess.to_datetime* is the name of module and function in watchhog plugin directory (postprocess module is distributed with watchhog itself). *postprocess.to_datetime* function actually converts field named 'datetime' to python datetime format using *"%d/%b/%Y:%H:%M:%S"* parsing configuration. Plugins mechanism is powerful and it's described in section **Plugins** below.
 
 ```
 setvar rps = accesslog.rps_by(vhost)
 ```
-**setvar** directive makes watchdog create a variable (called **rps** in example above) and assign the return value of function following.
+**setvar** directive makes watchdog create a variable (called **rps** in example above) and assign the return value of function following. Variables are available for reading via the HTTP API.
 
 
 How the heck does it work exactly?
@@ -114,18 +114,18 @@ How the heck does it work exactly?
 Filekeeper
 ----------
 
-Watchhog creates a so called Filekeeper that tracks the logfile, reopens it after logrotate and so on. Every *period* scheduler creates task to poll the new data from log. One of workers (number of workers are configured with *threads* option) takes the task and asks Filekeeper to read the new data from log file. Filekeeper reads the file from previous position up to the end, reopens the new file, if it was rotated within the period and reads it up to the end too.
+Watchhog creates a so called Filekeeper which tracks the logfile, reopens it after a logrotate and so on. Every *period* the scheduler creates a task to poll the new data from log. One of workers (number of workers are configured with *threads* option) takes the task and asks Filekeeper to read the new data from log file. Filekeeper reads the file from previous position up to the end, reopens the new file, if it was rotated within the period and reads it up to the end too.
 
 
 Parser
 ------
 
-The next step is parsing. Every line of logfile portion is being parsed to create a *record* - actually a simple python dict. Every record is a key/value, where keys are field names configured in *pattern* and values are strings. Often strings are not convinient type of data, especially when you know exactly what type of data the particular field holds. Here goes *postprocess* functions. This is where the magic begins.
+The next step is parsing. Every line of logfile portion is being parsed to create a *record* - actually a simple python dict. Every record is a key/value, where keys are field names configured in *pattern* and values are strings. Often strings are not convinient type of data, especially when you know exactly what type of data the particular field holds. Here the *postprocess* functions go.
 
 Postprocess
 -----------
 
-When each record is created, Watchhog runs postprocess functions passing the record as the first argument and the other arguments configured right behind. For example we have http status code field called **status** and we sure it's always integer. Configuration says:
+When a record is created, Watchhog runs postprocess functions passing the record as the first argument and the other arguments configured right behind. For example we have http status code field called **status** and we sure it's always integer. Configuration says:
 ```
 postprocess postprocess.to_int(status)
 ```
@@ -146,7 +146,7 @@ As you can see, the record['status'] will be a type of int after function runnin
 Indexes
 -------
 
-The next important step is indexing. Indexes help watchhog (and us finally) to search particular records in store table.
+The next important step is indexing. Indexes help watchhog (and us finally) to search particular records in the store table.
 Indexes are python structures built the following way. Let's say you have some lines of log:
 ```
 [2016-02-18 12:34:30] example.com "GET /ping HTTP/1.0" 200
@@ -199,7 +199,7 @@ index['status.vhost']['counters'] = {
 Variables
 ---------
 
-So we have now the table that consist of all parsed lines in the last portion of log (previous part was dropped to free memory, watchhog is a tool for just-right-now monitoring), some fields are converted to convinient type, everything is indexed. Now we can group and reduce with the mechanism of variables.
+So now we have a table which consists of all parsed lines in the last portion of log (previous part was dropped to free the memory, watchhog is a tool for just-right-now monitoring), some fields are converted to a convinient type, everything is indexed. Now we can group and reduce with the mechanism of variables.
 ```
 setvar rps = accesslog.rps_by(vhost)
 ```
