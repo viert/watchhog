@@ -250,11 +250,11 @@ uid = root
 ```
 
 This configuration allows you to run watchhog without frontend nginx or another webserver, uWSGI daemon will handle http interface for you.
-The things you should remember when you configure uwsgi manually are:
+The things you should keep in mind when you configure uwsgi manually are:
 
-- master option should be false. watchhog requires only one process to run at a moment, so you don't need master/multiworkers uwsgi mechanism.
-- need-app must be set to true to prevent uwsgi from starting empty: remember that watchhog must start its worker threads no matter if you ask it for data via http or don't
-- processes should be set to 1 (see the explanation of master option)
+- master option must be set to false. watchhog requires only one process to run at a moment, so you don't need master/multiworkers uwsgi mechanism.
+- need-app must be set to true to prevent uwsgi from starting empty waiting for a request: remember that watchhog must start its' worker threads no matter whether or not you ask it for data via http
+- processes option should be set to 1 (see the explanation of master option)
 - enable-threads must be set to true to enable uwsgi python interpreter threads. watchhog uses at least 2 threads: one for frontend interface and one for data collection and processing.
 - single-interpreter must be set to true for the same reason you set processes option to 1
 - you can set uid to whatever you want but be sure watchhog can read your logs you want to parse
